@@ -1,0 +1,10 @@
+{
+  "apps": [
+    {
+      "name": "ui-cn-feed",
+      "script": "app.cirru",
+      "exec_interpreter": "cirru-script",
+      "env": {}
+    }
+  ]
+}
