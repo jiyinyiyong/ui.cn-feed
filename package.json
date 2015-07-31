@@ -8,7 +8,11 @@
     "express": "^4.13.1",
     "rss": "^1.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "cirru-script": "^0.2.3",
+    "gulp": "^3.9.0",
+    "rsyncwrapper": "^0.4.3"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

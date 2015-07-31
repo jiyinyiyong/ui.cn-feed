@@ -2,8 +2,10 @@
 var
   express $ require :express
   RSS $ require :rss
-  http $ require :http
   cheerio $ require :cheerio
+  ajax $ require :./src/ajax
+  Future $ require :./src/future
+  info $ require :./src/info
 
 var app (express)
 
@@ -11,41 +13,38 @@ app.get :/ $ \ (req res)
   res.send ":seed /feed"
 
 app.get :/feed $ \ (req res)
-  var feed $ new RSS $ {}
-    :title ":UI.cn Feed"
-    :description ":Picture updates from UI.cn"
-    :link :http://ui.cn
-    :image :http://s6.ui.cn/img/ft-logo.png
-    :copyright :MIT
-    :author $ {}
-      :name :jiyinyiyong
-      :email :jiyinyiyong@gmail.com
-      :link :http://tiye.me
-  http.get
-    {} (:host :www.ui.cn) (:path :/)
-    \ (response)
-      var html :
-      response.on :data $ \ (chunk) (= html $ + html chunk)
-      response.on :end $ \ ()
-        var dom $ cheerio.load html
-        var container $ dom :.Inspir-list
-        var items $ container.find ":.iInspir-cover"
+  var feed $ new RSS info.rss
 
-        items.each $ \ (index item)
-          var target $ dom item
-          var a $ ... target (find :a) (first)
-          var img $ ... target (find :img) (first)
-          var user $ ... target (find ":.iInspir-cover-user strong") (first)
+  var req $ ajax.get :http://www.ui.cn/new.html
+  req.ready $ \ (newPage)
+    var dom $ cheerio.load newPage.html $ {} (:decodeEntities false)
+    var container $ dom :.Inspir-list
+    var items $ container.find ":.iInspir-title a[title]"
 
-          feed.item $ {}
-            :title
-              + (img.attr :alt) ": - " (user.text)
-            :url $ a.attr :href
-            :description (img.attr :data-original)
-            :date $ new Date
+    var fetchFuts $ items.map $ \ (item)
+      var target $ dom this
+      var href $ target.attr :href
+      ajax.get href
 
-        res.set :Content-Type :text/xml
-        res.send (feed.xml)
+    var allFuts $ Future.all $ Array.apply null fetchFuts
+    allFuts.ready $ \ (htmlResults)
+      htmlResults.forEach $ \ (workPage)
+        var pageDom $ cheerio.load workPage.html $ {} (:decodeEntities false)
+        var workContent $ pageDom :.work-content
+        ... workContent
+          find :img
+          each $ \ ()
+            var img $ pageDom this
+            img.attr :src $ img.attr :data-original
+        var item $ {}
+          :title $ ... (pageDom :title) (text)
+          :url workPage.url
+          :description $ workContent.html
+          :date $ ... (pageDom ":.cont-hd-l .msg-li") (find :span) (eq 1) (text)
+          :author $ ... (pageDom :#list-author) (text)
+        feed.item item
+      res.set :Content-Type :text/xml
+      res.send (feed.xml)
 
 app.listen 4002
 console.log ":server started at 4002"

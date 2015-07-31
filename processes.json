@@ -1,7 +1,8 @@
 {
   "apps": [
     {
-      "name": "ui-cn-feed",
+      "name": "uicn-feed",
+      "cwd": "/home/chen/server/uicn-feed",
       "script": "app.cirru",
       "exec_interpreter": "cirru-script",
       "env": {}

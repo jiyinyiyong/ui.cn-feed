@@ -5,10 +5,11 @@ var
 var a $ new Future
 var b $ new Future
 
-Future.all
+var allFuts $ Future.all
   [] a b
-  \ (results)
-    console.log results
+
+allFuts.ready $ \ (results)
+  console.log results
 
 setTimeout
   \ ()

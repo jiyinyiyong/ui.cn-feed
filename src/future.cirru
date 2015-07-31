@@ -20,15 +20,18 @@ var Future $ \ ()
     fn this.value
   = this.slots null
 
-= Future.all $ \ (futs cb)
+= Future.all $ \ (futs)
+  var allFut $ new Future
   var check $ \ ()
     if
       futs.every $ \ (fut) fut.completed
       do
-        cb $ futs.map $ \ (fut) fut.value
+        allFut.complete $ futs.map $ \ (fut) fut.value
     return undefined
 
   futs.forEach $ \ (fut)
     fut.ready check
+
+  return allFut
 
 = module.exports Future
