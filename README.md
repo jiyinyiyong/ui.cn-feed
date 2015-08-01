@@ -5,6 +5,7 @@ Feed proxy server for UI.cn
 http://uicn-feed.origami-ui.org/feed
 
 Bug: 403 from ui.cn .. I don't know how to deal with it.
+So I have to swtich back to small images.
 
 ### Resouce
 

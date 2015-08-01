@@ -19,32 +19,19 @@ app.get :/feed $ \ (req res)
   req.ready $ \ (newPage)
     var dom $ cheerio.load newPage.html $ {} (:decodeEntities false)
     var container $ dom :.Inspir-list
-    var items $ container.find ":.iInspir-title a[title]"
-
-    var fetchFuts $ items.map $ \ (item)
-      var target $ dom this
-      var href $ target.attr :href
-      ajax.get href
-
-    var allFuts $ Future.all $ Array.apply null fetchFuts
-    allFuts.ready $ \ (htmlResults)
-      htmlResults.forEach $ \ (workPage)
-        var pageDom $ cheerio.load workPage.html $ {} (:decodeEntities false)
-        var workContent $ pageDom :.work-content
-        ... workContent
-          find :img
-          each $ \ ()
-            var img $ pageDom this
-            img.attr :src $ img.attr :data-original
-        var item $ {}
-          :title $ ... (pageDom :title) (text)
-          :url workPage.url
-          :description $ workContent.html
-          :date $ ... (pageDom ":.cont-hd-l .msg-li") (find :span) (eq 1) (text)
-          :author $ ... (pageDom :#list-author) (text)
-        feed.item item
-      res.set :Content-Type :text/xml
-      res.send (feed.xml)
+    var items $ container.find ":.iInspir-cover"
+    items.each $ \ ()
+      var block $ dom this
+      var imgEl $ ... block (find :img) (first)
+      imgEl.attr :src $ imgEl.attr :data-original
+      var item $ {}
+        :title $ ... block (find :.iInspir-title) (first) (text)
+        :url $ ... block (find ":.iInspir-title a") (first) (attr :href)
+        :description $ ... block (html)
+        :author $ ... block (find ":.iInspir-cover-user strong") (first) (text)
+      feed.item item
+    res.set :Content-Type :text/xml
+    res.send (feed.xml)
 
 app.listen 4002
 console.log ":server started at 4002"
